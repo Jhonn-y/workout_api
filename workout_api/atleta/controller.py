@@ -3,6 +3,10 @@ from uuid import uuid4
 from fastapi import APIRouter, Body, HTTPException, status
 from pydantic import UUID4
 
+#resposta do desafio (importação da biblioteca)
+from fastapi import APIRouter, Body, Query
+
+
 from workout_api.atleta.schemas import AtletaIn, AtletaOut, AtletaUpdate
 from workout_api.atleta.models import AtletaModel
 from workout_api.categorias.models import CategoriaModel
@@ -62,17 +66,30 @@ async def post(
 
     return atleta_out
 
-
+# alteração deste bloco de codigo pra a inclusão do nome e CPF nos end-points
 @router.get(
-    '/', 
+    '/atleta', 
     summary='Consultar todos os Atletas',
     status_code=status.HTTP_200_OK,
     response_model=list[AtletaOut],
 )
-async def query(db_session: DatabaseDependency) -> list[AtletaOut]:
-    atletas: list[AtletaOut] = (await db_session.execute(select(AtletaModel))).scalars().all()
+async def query_atletas(
+    db_session: DatabaseDependency,
+    nome: str = Query(None),
+    cpf: str = Query(None)
+) -> list[AtletaOut]:
+    query = select(AtletaModel)
+
+    if nome:
+        query = query.filter(AtletaModel.nome == nome)
+    
+    if cpf:
+        query = query.filter(AtletaModel.cpf == cpf)
+
+    atletas: list[AtletaOut] = (await db_session.execute(query)).scalars().all()
     
     return [AtletaOut.model_validate(atleta) for atleta in atletas]
+##################################################################################
 
 
 @router.get(
