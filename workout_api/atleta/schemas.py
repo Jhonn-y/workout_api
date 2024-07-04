@@ -20,9 +20,13 @@ class Atleta(BaseSchema):
 class AtletaIn(Atleta):
     pass
 
-
+# alterando a classe para receber campos de categoria e centro_treinamento
 class AtletaOut(Atleta, OutMixin):
-    pass
+    categoria: Optional[CategoriaIn]
+    centro_treinamento: Optional[CentroTreinamentoAtleta]
+
+    class Config:
+        orm_mode = True
 
 class AtletaUpdate(BaseSchema):
     nome: Annotated[Optional[str], Field(None, description='Nome do atleta', example='Joao', max_length=50)]
